@@ -1,0 +1,80 @@
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      Tags:
+       - Key: "Name"
+         Value: "CF-Sham-VPC"
+      CidrBlock: 40.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key : "Name"
+          Value: "CF-Sham-VPC-IGW"
+  InternetGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties: 
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref VPC
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      Tags:
+        - Key:  "Name"
+          Value: "CF-Sham-VPC-Public-Subnet"
+      VpcId: !Ref VPC
+      CidrBlock: 40.0.1.0/16
+      MapPublicIpOnLaunch: True
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: "CF-Sham-PublicRouteTable"
+      VpcId: !Ref VPC
+  PublicRouteEntries:
+    Type: AWS::EC2::Route
+    Properties:
+      GatewayId: !Ref InternetGateway
+      DestinationCidrBlock: 0.0.0.0/0
+      RouteTableId: !Ref PublicRouteTable
+    DependsOn: InternetGatewayAttachment
+  PublicSubnetAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicSubnet
+  EC2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: "This is security group for CF-Sham-Instance-SG"
+      Tags:
+        - Key: "Name"
+          Value: "CF-Sham-Instance-SG"
+      SecurityGroupIngress: 
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      Tags:
+        - Key: "Name"
+          Value: "CFShamInstance"
+      ImageId: "ami-0d682f26195e9ec0f"
+      InstanceType: "t2.micro"
+      SubnetId: !Ref PublicSubnet
+      SecurityGroupIds:
+        - !Ref EC2SecurityGroup
+    
+
+
+  
+  
