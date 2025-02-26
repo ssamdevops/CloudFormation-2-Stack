@@ -1,0 +1,15 @@
+Parameters:
+  S3Parameter:
+    Type: String
+    Description: Provide a name for your S3 Bucket. Bucket name must be globally unique and must not contain spaces or uppercase letters
+    ConstraintDescription: Bucket name must be globally unique and must not contain spaces or uppercase letters.
+    AllowedPattern: ^[a-z0-9.-]{3,63}$
+Resources:
+  S3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref S3Parameter
+      VersioningConfiguration:
+        Status: Enabled
+
+
